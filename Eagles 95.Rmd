@@ -17,7 +17,7 @@ the Census Bureau website using an API and a census key. CBP is an annual series
 
 ### Data Exploration and Visualization: 
 
-For our analysis, we worked on identifying the patterns in the business industries in the US as compared to the DMV metro area. We focused our analysis on the top paying industries by Average Annual Payroll per Employee (AP). We then further analyzed the nature of the business environment in the DMV area that would contribute to the disparities in the AP including which industries had the most establishments and which were the top employers. 
+For our analysis, we worked on identifying the patterns in the business industries in the US as compared to the DMV metro area. We focused our analysis on the top paying industries by Average Annual Payroll per Employee (AP). We then further analyzed the nature of the business environment in the DMV area that would contribute to the disparities in the AP including which industries had the most establishments and which were the top employers. Additionally, we compared the number of establishments in the DMV area with a few other surrounding states over the years of 2012 to 2020. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
