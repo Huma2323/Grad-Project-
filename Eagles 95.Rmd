@@ -37,8 +37,41 @@ Sys.getenv("CENSUS_KEY")
 ### Average Annual Payroll Per Employee by Industry for the DMV area vs the US
 
 
-
 ```{r}
+cbp_dmv <- getCensus( name = "cbp" ,
+           vintage = 2020,
+           key = Sys.getenv("CENSUS_KEY"),
+           vars = c("NAME","NAICS2017","NAICS2017_LABEL","PAYANN","EMP"),
+          region = "state:11,24,51")
+
+cbp_AP_dmv <- cbp_dmv %>% 
+  as_tibble() %>% 
+  filter(NAICS2017 %in% c("11","21","22","23","31","42","44","48","51","52","53","54","55","56","61","62","71","72", "81","99")) %>% 
+  group_by(NAICS2017) %>% 
+  mutate(sumpayann= sum(PAYANN)) %>% 
+  mutate(sumemp=sum(EMP)) %>% 
+  mutate(annual_payroll_per_employee= sumpayann/sumemp) %>% 
+  select(NAICS2017, NAICS2017_LABEL,annual_payroll_per_employee)
+
+cbp_AP_dmv <- cbp_AP_dmv[!duplicated(cbp_AP_dmv), ]
+
+cbp_US <- getCensus( name = "cbp" ,
+           vintage = 2020,
+           key = Sys.getenv("CENSUS_KEY"),
+           vars = c("NAME","NAICS2017","NAICS2017_LABEL","PAYANN","EMP"),
+          region = "us")
+
+cbp_AP_US <- cbp_US %>% 
+  as_tibble() %>% 
+  filter(NAICS2017 %in% c("11","21","22","23","31","42","44","48","51","52","53","54","55","56","61","62","71","72", "81","99")) %>% 
+  group_by(NAICS2017) %>% 
+  mutate(sumpayann= sum(PAYANN)) %>% 
+  mutate(sumemp=sum(EMP)) %>% 
+  mutate(annual_payroll_per_employee= sumpayann/sumemp) %>% 
+  select(NAICS2017, NAICS2017_LABEL,annual_payroll_per_employee)
+
+cbp_AP_US <- cbp_AP_US[!duplicated(cbp_AP_US), ]
+
 cbp_ap_dmv_us <- cbp_AP_dmv %>% 
   left_join(cbp_AP_US, by=c("NAICS2017","NAICS2017_LABEL")) %>% 
   rename("ap_DMV"=annual_payroll_per_employee.x,
@@ -60,15 +93,20 @@ cbp_ap_dmv_us$NAICS2017_LABEL <- gsub("Accommodation and food services","Accomod
 cbp_ap_dmv_us$NAICS2017_LABEL <- gsub("Management of companies and enterprises","MGMT of Companies",cbp_ap_dmv_us$NAICS2017_LABEL)
 
 head(cbp_ap_dmv_us)
-
 ggplot(data= cbp_ap_dmv_us)+
   geom_col(aes(x=NAICS2017_LABEL, y =annual_payroll,fill=Region),position = "dodge")+
   labs(
     y="Average Annual Payroll Per Employee ($1000s)"
   )+
+  labs(
+    title = "Comparison of Average Annual Payroll Per Employee",
+    subtitle = "US vs DMV"
+  )+
   theme_minimal()+
   theme(axis.title.x = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+
   
 
 ```
@@ -198,7 +236,7 @@ DMV_FIRM_State_Plot <- cbp_FIRM_STATE_dmv %>%
   ggplot(aes(y =reorder(NAME, sumestab), x = sumestab)) +
   geom_col(fill="#92C5DE")+
   geom_text(aes(label= round(sumestab, digits=0)), nudge_x = 60) +
-  xlab("Total Number of Firms (in 1000s)") +
+  xlab("Total Number of Firms in 1000s") +
   ggtitle("Total Establishments by State in the DMV Area") +
   theme_minimal()+
   theme(axis.title.y = element_blank(),
